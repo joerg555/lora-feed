@@ -68,6 +68,9 @@ define Package/chirpstack-application-server/install
 
 	$(INSTALL_DIR) $(1)/etc/init.d/
 	$(INSTALL_BIN) ./files/chirpstack-application-server.init $(1)/etc/init.d/chirpstack-application-server
+
+	$(INSTALL_DIR) $(1)/etc/chirpstack-application-server
+	$(INSTALL_DATA) ./files/chirpstack-application-server.toml $(1)/etc/chirpstack-application-server/chirpstack-application-server.toml.base
 endef
 
 $(eval $(call GoBinPackage,chirpstack-application-server))

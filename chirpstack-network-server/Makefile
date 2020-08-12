@@ -52,6 +52,9 @@ define Package/chirpstack-network-server/install
 
 	$(INSTALL_DIR) $(1)/etc/init.d/
 	$(INSTALL_BIN) ./files/chirpstack-network-server.init $(1)/etc/init.d/chirpstack-network-server
+
+	$(INSTALL_DIR) $(1)/etc/chirpstack-network-server
+	$(INSTALL_DATA) ./files/chirpstack-network-server.toml $(1)/etc/chirpstack-network-server/chirpstack-network-server.toml.base
 endef
 
 $(eval $(call GoBinPackage,chirpstack-network-server))
