@@ -45,6 +45,10 @@ define Package/chirpstack-geolocation-server/install
 
 	$(INSTALL_DIR) $(1)/etc/init.d/
 	$(INSTALL_BIN) ./files/chirpstack-geolocation-server.init $(1)/etc/init.d/chirpstack-geolocation-server
+	$(INSTALL_DATA) ./files/chirpstack-geolocation-server.toml $(1)/etc/chirpstack-geolocation-server/
+        # save on update
+	$(INSTALL_DIR) $(1)/lib/upgrade/keep.d/
+	$(INSTALL_DATA) ./files/chirpstack-gs.keep $(1)/lib/upgrade/keep.d/chirpstack-gs
 endef
 
 $(eval $(call GoBinPackage,chirpstack-geolocation-server))

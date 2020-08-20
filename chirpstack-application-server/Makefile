@@ -71,6 +71,9 @@ define Package/chirpstack-application-server/install
 
 	$(INSTALL_DIR) $(1)/etc/chirpstack-application-server
 	$(INSTALL_DATA) ./files/chirpstack-application-server.toml.base $(1)/etc/chirpstack-application-server/chirpstack-application-server.toml
+	# save on update
+	$(INSTALL_DIR) $(1)/lib/upgrade/keep.d/
+	$(INSTALL_DATA) ./files/chirpstack-as.keep $(1)/lib/upgrade/keep.d/chirpstack-as
 endef
 
 $(eval $(call GoBinPackage,chirpstack-application-server))

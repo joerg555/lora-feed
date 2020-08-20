@@ -48,6 +48,9 @@ define Package/chirpstack-gateway-bridge/install
 
 	$(INSTALL_DIR) $(1)/etc/chirpstack-gateway-bridge
 	$(INSTALL_DATA) ./files/chirpstack-gateway-bridge.toml $(1)/etc/chirpstack-gateway-bridge/
+	# save on update
+	$(INSTALL_DIR) $(1)/lib/upgrade/keep.d/
+	$(INSTALL_DATA) ./files/chirpstack-gb.keep $(1)/lib/upgrade/keep.d/chirpstack-gb
 endef
 
 $(eval $(call GoBinPackage,chirpstack-gateway-bridge))
