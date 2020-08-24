@@ -55,6 +55,9 @@ define Package/chirpstack-network-server/install
 
 	$(INSTALL_DIR) $(1)/etc/chirpstack-network-server
 	$(INSTALL_DATA) ./files/chirpstack-network-server.toml.base $(1)/etc/chirpstack-network-server/chirpstack-network-server.toml
+	# save on update
+	$(INSTALL_DIR) $(1)/lib/upgrade/keep.d/
+	$(INSTALL_DATA) ./files/chirpstack-ns.keep $(1)/lib/upgrade/keep.d/chirpstack-ns
 endef
 
 $(eval $(call GoBinPackage,chirpstack-network-server))
