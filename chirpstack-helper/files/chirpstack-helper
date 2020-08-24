@@ -1,0 +1,98 @@
+#!/bin/sh -x
+
+PGDATA=/mnt/mmcblk0p1/postgres
+PASSWAS=LoraWan
+PASSWNS=LoraWan
+
+
+help() {
+        cat <<EOF
+Syntax: chirpstack-helper [command]
+
+Available commands:
+  convertext4   Convert SD-Card to ext4 filesystem
+  initpsql      Set postgresql data location to ${PGDATA}
+  initdb_as     Setup application-server database
+  initdb_ns     Setup network-server database
+  start         Start network-server and application-server
+  stop          Stop  network-server and application-server
+  backupdb      Save  database content to sql-files in current directory
+  restoredb     Restore database form sql-files in current directory
+EOF
+}
+
+convertext4()
+{
+	umount /mnt/mmcblk0p1
+	mkfs.ext4 /dev/mmcblk0p1
+	block mount
+}
+
+initpsql()
+{
+	/etc/init.d/chirpstack-application-server stop
+	/etc/init.d/chirpstack-network-server stop
+	/etc/init.d/chirpstack-gateway-bridge stop
+	/etc/init.d/postgresql stop
+	mkdir -p /mnt/mmcblk0p1/postgres
+	chmod 777 /mnt/mmcblk0p1/postgres
+	# /data/postgresql/data
+	uci set postgresql.config.PGDATA=${PGDATA}/data
+	uci commit
+	/etc/init.d/postgresql start
+}
+
+initdb_as()
+{
+	sed -i "s/:Password/:${PASSWAS}/g"  /etc/chirpstack-application-server/chirpstack-application-server.toml
+psql -h 127.0.0.1 -U postgres <<EOF
+create role chirpstack_as with login password '${PASSWAS}';
+create database chirpstack_as with owner chirpstack_as;
+\c chirpstack_as
+create extension pg_trgm;
+create extension hstore;
+\q
+EOF
+}
+
+initdb_ns()
+{
+	sed -i "s/:Password/:${PASSWNS}/g"  /etc/chirpstack-network-server/chirpstack-network-server.toml
+psql -h 127.0.0.1 -U postgres <<EOF
+create role chirpstack_ns with login password '${PASSWNS}';
+create database chirpstack_ns with owner chirpstack_ns;
+\q
+EOF
+}
+
+backupdb()
+{
+	pg_dump -h 127.0.0.1 -U postgres -d chirpstack_as >chirpstack_as.sql
+	pg_dump -h 127.0.0.1 -U postgres -d chirpstack_ns >chirpstack_ns.sql
+
+}
+
+restoredb()
+{
+	psql -h 127.0.0.1 -U postgres chirpstack_ns <chirpstack_ns.sql
+	psql -h 127.0.0.1 -U postgres chirpstack_as <chirpstack_as.sql
+}
+
+
+start()
+{
+	/etc/init.d/chirpstack-application-server start
+	/etc/init.d/chirpstack-network-server start
+	#/etc/init.d/chirpstack-gateway-bridge restart
+}
+
+stop()
+{
+	/etc/init.d/chirpstack-application-server stop
+	/etc/init.d/chirpstack-network-server stop
+	#/etc/init.d/chirpstack-gateway-bridge restart
+}
+
+action=${1:-help}
+shift 1
+$action "$@"
