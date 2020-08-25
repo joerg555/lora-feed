@@ -14,10 +14,11 @@ Available commands:
   initpsql      Set postgresql data location to ${PGDATA}
   initdb_as     Setup application-server database
   initdb_ns     Setup network-server database
+  initdb        Setup network- and application-server database
   start         Start network-server and application-server
   stop          Stop  network-server and application-server
-  backupdb      Save  database content to sql-files in current directory
-  restoredb     Restore database form sql-files in current directory
+  backupdb      Save    to   current directory postgres database content and redis dump
+  restoredb     Restore from current directory postgres database content and redis dump
 EOF
 }
 
@@ -65,17 +66,33 @@ create database chirpstack_ns with owner chirpstack_ns;
 EOF
 }
 
+initdb()
+{
+	initdb_as
+	initdb_ns
+}
+
+
 backupdb()
 {
+	# dump postgres database
 	pg_dump -h 127.0.0.1 -U postgres -d chirpstack_as >chirpstack_as.sql
 	pg_dump -h 127.0.0.1 -U postgres -d chirpstack_ns >chirpstack_ns.sql
-
+	# backup redis data
+	/etc/init.d/redis/stop
+	cp /dump.rdb redis_dump.rdb
+	/etc/init.d/redis/start
 }
 
 restoredb()
 {
+	# restore redis database
 	psql -h 127.0.0.1 -U postgres chirpstack_ns <chirpstack_ns.sql
 	psql -h 127.0.0.1 -U postgres chirpstack_as <chirpstack_as.sql
+	# restore redis data
+	/etc/init.d/redis/stop
+	cp redis_dump.rdb /dump.rdb
+	/etc/init.d/redis/start
 }
 
 
