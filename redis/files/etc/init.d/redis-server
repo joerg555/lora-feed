@@ -6,7 +6,12 @@ SERVICE_DAEMONIZE=1
 SERVICE_WRITE_PID=1
 
 start() {
-	service_start /usr/bin/redis-server
+	local DIR=`uci -q get redis.config.DIR`
+	local options=""
+	if [ "${DIR}" != "" ]; then
+		options="--dir ${DIR}"
+	fi
+	service_start /usr/bin/redis-server ${options}
 }
 
 stop() {

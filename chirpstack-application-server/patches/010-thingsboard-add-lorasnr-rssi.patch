@@ -1,0 +1,13 @@
+--- a/internal/integration/thingsboard/thingsboard.go
++++ b/internal/integration/thingsboard/thingsboard.go
+@@ -61,6 +61,10 @@ func (i *Integration) SendDataUp(ctx con
+ 	attributes["dev_eui"] = pl.DevEUI
+ 
+ 	telemetry := structToMap("data", pl.Object)
++	if len(pl.RXInfo) > 0 {
++		telemetry["LoRaSNR"] = strconv.FormatFloat(pl.RXInfo[0].LoRaSNR,'g', -1, 64)
++		telemetry["RSSI"] = strconv.FormatInt(int64(pl.RXInfo[0].RSSI), 10)
++	}
+ 
+ 	if err := i.send(accessToken, attributes, telemetry); err != nil {
+ 		return errors.Wrap(err, "send event error")

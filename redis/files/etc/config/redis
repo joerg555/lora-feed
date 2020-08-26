@@ -1,0 +1,4 @@
+
+config redis 'config'
+	option DIR '/mnt/mmcblk0p1/redis'
+
