@@ -17,8 +17,9 @@ MAKE_FLAGS+= \
 	PREFIX="$(PKG_INSTALL_DIR)/usr"
 
 define Package/redis
-  SECTION:=net
-  CATEGORY:=Network
+  SECTION:=utils
+  CATEGORY:=Utilities
+  SUBMENU:=database
   TITLE:=Advanced key-value cache and store
   DEPENDS:=+libpthread
   URL:=http://redis.io
