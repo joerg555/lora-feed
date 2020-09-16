@@ -1,9 +1,14 @@
 #!/bin/sh -x
+#DEV=sda1
+DEV=mmcblk0p1
 
-PGDATA=/mnt/mmcblk0p1/postgres
+MOUNTP=/mnt/${DEV}
+DEVICE=/dev/${DEV}
+
+PGDATA=${MOUNTP}/postgres
 PASSWAS=LoraWan
 PASSWNS=LoraWan
-RDDIR=/mnt/mmcblk0p1/redis
+RDDIR=${MOUNTP}/redis
 
 
 help() {
@@ -17,17 +22,22 @@ Available commands:
   initdb_as     Setup application-server database
   initdb_ns     Setup network-server database
   initdb        Setup network- and application-server database
-  start         Start network-server and application-server
-  stop          Stop  network-server and application-server
+  startall      Start network-server and application-server, ...
+  stopall       Stop  network-server and application-server, ...
   backupdb      Save    to   current directory postgres database content and redis dump
   restoredb     Restore from current directory postgres database content and redis dump
+Variables
+  MOUNTP        ${MOUNTP}
+  DEVICE        ${DEVICE}
+  PGDATA        ${PGDATA}
+  RDDIR         ${RDDIR}
 EOF
 }
 
 convertext4()
 {
-	umount /mnt/mmcblk0p1
-	mkfs.ext4 /dev/mmcblk0p1
+	umount ${MOUNTP}
+	mkfs.ext4 ${DEVICE}
 	block mount
 }
 
@@ -91,9 +101,9 @@ backupdb()
 	pg_dump -h 127.0.0.1 -U postgres -d chirpstack_as >chirpstack_as.sql
 	pg_dump -h 127.0.0.1 -U postgres -d chirpstack_ns >chirpstack_ns.sql
 	# backup redis data
-	/etc/init.d/redis/stop
+	/etc/init.d/redis-server stop
 	cp ${RDDIR}/dump.rdb redis_dump.rdb
-	/etc/init.d/redis/start
+	/etc/init.d/redis-server start
 }
 
 restoredb()
@@ -102,24 +112,28 @@ restoredb()
 	psql -h 127.0.0.1 -U postgres chirpstack_ns <chirpstack_ns.sql
 	psql -h 127.0.0.1 -U postgres chirpstack_as <chirpstack_as.sql
 	# restore redis data
-	/etc/init.d/redis/stop
+	/etc/init.d/redis stop
 	cp redis_dump.rdb ${RDDIR}/dump.rdb
-	/etc/init.d/redis/start
+	/etc/init.d/redis start
 }
 
 
-start()
+startall()
 {
+	/etc/init.d/redis-server start
+	/etc/init.d/postgresql start
 	/etc/init.d/chirpstack-application-server start
 	/etc/init.d/chirpstack-network-server start
-	#/etc/init.d/chirpstack-gateway-bridge restart
+	/etc/init.d/chirpstack-gateway-bridge stop
 }
 
-stop()
+stopall()
 {
 	/etc/init.d/chirpstack-application-server stop
 	/etc/init.d/chirpstack-network-server stop
-	#/etc/init.d/chirpstack-gateway-bridge restart
+	/etc/init.d/chirpstack-gateway-bridge stop
+	/etc/init.d/postgresql stop
+	/etc/init.d/redis-server stop
 }
 
 action=${1:-help}
