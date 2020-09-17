@@ -112,9 +112,9 @@ restoredb()
 	psql -h 127.0.0.1 -U postgres chirpstack_ns <chirpstack_ns.sql
 	psql -h 127.0.0.1 -U postgres chirpstack_as <chirpstack_as.sql
 	# restore redis data
-	/etc/init.d/redis stop
+	/etc/init.d/redis-server stop
 	cp redis_dump.rdb ${RDDIR}/dump.rdb
-	/etc/init.d/redis start
+	/etc/init.d/redis-server start
 }
 
 
