@@ -10,5 +10,5 @@ dsn="postgres://chirpstack_as:Password@localhost/chirpstack_as?sslmode=disable"
   jwt_secret="Password"
 
   [application_server.codecs.js]
-  max_exec_time="500ms"
+  max_execution_time="500ms"
 
