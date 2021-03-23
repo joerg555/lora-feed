@@ -3,7 +3,7 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=webconn
+PKG_NAME:=chirpstack-help
 PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
@@ -14,6 +14,15 @@ define Package/chirpstack-helper
   SUBMENU:=LoRaWAN
   TITLE:=Helper script to setup chirpstack und pgsql postgres database
   PKGARCH:=all
+endef
+
+define Package/chirpstack-appmeta
+  SECTION:=net
+  CATEGORY:=Network
+  SUBMENU:=LoRaWAN
+  TITLE:=apps chirpstack, pgsql and mosquitto
+  PKGARCH:=all
+  DEPENDS:=chirpstack-application-server chirpstack-network-server chirpstack-helper mosquitto-ssl pgsql-cli pgsql-server redis
 endef
 
 define Build/Prepare
@@ -29,4 +38,9 @@ define Package/chirpstack-helper/install
 	$(CP) ./files/chirpstack-helper $(1)/usr/bin
 endef
 
+define Package/chirpstack-appmeta/install
+	#
+endef
+
+$(eval $(call BuildPackage,chirpstack-appmeta))
 $(eval $(call BuildPackage,chirpstack-helper))
